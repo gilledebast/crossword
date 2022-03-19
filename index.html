@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crossword generator</title>
+  <script type="text/javascript" src="./js/libs/paper.min.js"></script>
+  <script type="text/javascript" src="./js/libs/paper-wordwrap.js"></script>
+  <script type="text/javascript" src="./js/crossword.js"></script>
+  <style>
+    html,
+    body {
+        height: 100%;
+        margin: 0; padding:0;
+    }
+    canvas {
+        width: 100%;
+        height: 100%;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <script>
+    paper.install(window);
+    window.onload = function() {
+      let crossword = new Crossword({line:15,col:10,size:50});
+          crossword.generate('./data/crossword-1647638052.json');
+    };
+  </script>
+</body>
+</html>
