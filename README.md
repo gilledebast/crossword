@@ -2,6 +2,8 @@
 
 Crossword.js is a class to easily create crosswords.
 
+![crossword example](https://github.com/[username]/[reponame]/blob/[branch]/readme-assets/crossword-example.png?raw=true)
+
 ## License
 MIT licensed
 
