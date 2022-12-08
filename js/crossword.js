@@ -7,7 +7,7 @@
  *
  * TODO
  * - Add visual separator for compound words
- * - Adjust canvas width whit actual grid size
+ * - Adjust canvas width with actual grid size
  * 
  * Update: 03/19/22 Current V.1.0
  * ----------------------------------------------------------------------------------------------------
