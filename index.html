@@ -4,9 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Crossword generator</title>
-  <script type="text/javascript" src="./js/libs/paper.min.js"></script>
-  <script type="text/javascript" src="./js/libs/paper-wordwrap.js"></script>
-  <script type="text/javascript" src="./js/crossword.js"></script>
+  <script type="text/javascript" src="./js/libs/paper.min.js" defer></script>
+  <script type="text/javascript" src="./js/libs/paper-wordwrap.js" defer></script>
+  <script type="module" src="./js/app.js" defer></script>
   <style>
     html,
     body {
@@ -21,12 +21,5 @@
 </head>
 <body>
   <canvas id="canvas"></canvas>
-  <script>
-    paper.install(window);
-    window.onload = function() {
-      let crossword = new Crossword({line:15,col:10,size:50});
-          crossword.generate('./data/crossword-1647638052.json');
-    };
-  </script>
 </body>
 </html>

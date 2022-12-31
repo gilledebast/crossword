@@ -13,10 +13,15 @@
  * ----------------------------------------------------------------------------------------------------
  */
 
-class Crossword{
+//import { style } from '';
+//import { helpers } from '';
+//import { loader } from '';
+
+export class Crossword{
   constructor({line,col,size}){
 
     //SETUP PAPER.JS
+    paper.install(window);
     this.canvas = document.getElementById('canvas');
     paper.setup(this.canvas);
 
@@ -146,7 +151,7 @@ class Crossword{
     return r.x1 <= p.x && p.x <= r.x1 + w && r.y1 <= p.y && p.y <= r.y1 + h;
   }
 
-  hitsToArrowing(hits, length){
+  whichArrows(hits, length){
 
     let arrows = new Array();
 
@@ -216,7 +221,7 @@ class Crossword{
     const {x,y,w,h} = this.getBoxData(box);
 
     const hits = this.whichZone(coordinate);
-    const arrowing = this.hitsToArrowing(hits, definitions.length);
+    const arrows = this.whichArrows(hits, definitions.length);
 
     if(definitions.length == 1){
 
@@ -224,10 +229,10 @@ class Crossword{
       text.wordwrap(definitions[0].label.toUpperCase(), 9);
       text.position.y -= h/2 - (h-text.bounds.height)/2;
 
-      const arrow = this.createArrow(box, arrowing);
+      const arrow = this.createArrow(box, arrows);
 
       //SOLUTION
-      if(this.showSolution) this.addSolution(definitions[0].solution,arrowing[0],coordinate);
+      if(this.showSolution) this.addSolution(definitions[0].solution,arrows[0],coordinate);
 
     } else if(definitions.length == 2){
 
@@ -245,12 +250,12 @@ class Crossword{
 
       text2.position.y -= (text2.bounds.top - (y-h/2)) - (margin*3+text1.bounds.height);
 
-      const arrow = this.createArrow(box, arrowing);
+      const arrow = this.createArrow(box, arrows);
 
       //SOLUTION
       if(this.showSolution){
-        this.addSolution(definitions[0].solution,arrowing[0],coordinate);
-        this.addSolution(definitions[1].solution,arrowing[1],coordinate);
+        this.addSolution(definitions[0].solution,arrows[0],coordinate);
+        this.addSolution(definitions[1].solution,arrows[1],coordinate);
       }
     } else {
       throw new Error("Wrong definition length");
@@ -410,6 +415,8 @@ class Crossword{
     return _letter;
   }
 
+  /* ––––––––––––––––––––––––– LOAD & GENERATE ––––––––––––––––––––––––– */
+
   async load(url){
     const options = {method: 'GET',cache: 'no-cache'}; //cache ?
     let response = await fetch(new Request(url, options));
@@ -421,104 +428,128 @@ class Crossword{
     this.load(path).then(vocable => vocable.forEach(v => this.createDefinition(v)));
   }
 
-  
-  //FOR LATER...
-  // The next improvement is an automatic crossword generator with a database of words and definitions
+  /* ––––––––––––––––––––––––––– LOAD & FIND ––––––––––––––––––––––––––– */
 
-  //this.vocabularyPath = "./data/vocabulary.json";
-  //this.vocabulary;
-  //this.loadVocabulary().then(vocable => {
-  //  this.vocabulary = vocable;
-  //  this.wordFinding(
-  //    "a-----",
-  //    [
-  //      "await",
-  //      "asleep",
-  //      "rabbit",
-  //      "hiring",
-  //      "attendes"
-  //    ]
-  //  );
-  //});
-  //
-  //async loadVocabulary(){
-  //  const options = {method: 'GET',cache: 'no-cache'}; //cache ?
-  //  let response = await fetch(new Request(this.vocabularyPath));
-  //  let data = await response.json();
-  //  return data;
-  //}
-  //
+  /*
+   * Wordfinding algorithm
+   * Use string schema to find matching word (ex : L-- or -ART---)
+   * return an array of strings
+   */
+  wordFinding(schema, wordArray){
+  
+    console.log(wordArray);
+
+    const regexedSchema = new RegExp('^'+schema.replaceAll("-","[a-z]").toLowerCase()+'$');
+  
+    let matches = new Array();
+    wordArray.forEach(sample => {
+      if(regexedSchema.test(sample)){
+        matches.push(sample);
+      }
+    });
+    return matches;
+  }
+
+  // WordFinding usage example
+  // 
+  // this.wordFinding(
+  //   "a-----",
+  //   [
+  //     "await",
+  //     "asleep",
+  //     "rabbit",
+  //     "hiring",
+  //     "attendes"
+  //   ]
+  // );
+
+  randomItemInArray(array){
+    return array[Math.floor(Math.random()*array.length)];
+  }
+  
+  randomInt(max){
+    return Math.floor(Math.random() * max);
+  }
+  
+  randomIntMultiple(min, max, multiple){
+    return Math.round((Math.random()*(max-min)+min)/multiple)*multiple;
+  }
+
+  /* ––––––––––––––––––––––––––– EXPERIMENTAL ––––––––––––––––––––––––––– */
+
+
   //    #|A|#|A|#|A|#|A
   //    B|A|S|T|#|A|A|A
   //    #|A|A|A|A|A|A|A
   //    A|A|#|A|A|A|A|#
   //    #|A|A|A|#|A|A|A
   //    A|A|A|A|A|#|A|A
-  //
-  //#1 select longest word
-  //#2 select matching strings {save them for later}
-  //When matche are found move to next "challenge"
-  //If no matching string change candidate.
-  //
-  //if no more matching candidate brute reseat
-  //
-  //fill(){
-  //
-  //  this.load('./data/testdata.json').then(data => {
-  //    //Générer une définition juste avec une coordonnée
-  //    const index = this.randomInt(10).toString();
-  //    let first = this.randomItemInArray(data[index]);
-  //    
-  //    //console.log(first);
-  //    let matches = this.wordFinding("-"+first.charAt(1)+"---", data[this.randomInt(10).toString()]);
-  //    //console.log(matches);
-  //    let seconde = matches[0];
-  //    this.createDefinition(
-  //      {
-  //        coordinate : [0,0],
-  //        definitions : [
-  //          {
-  //            label: "to add",
-  //            solution: first
-  //          },{
-  //            label: "to add",
-  //            solution: seconde
-  //          }
-  //        ]
-  //      }
-  //    );
-  //  });  
-  //
-  //}
-  //
-  ///*
-  // * Wordfinding algorithm
-  // * Use string schema to find matching word (ex : L-- or -ART---)
-  // * return an array of strings
-  // */
-  //wordFinding(schema, wordArray){
-  //
-  //  const regexedSchema = new RegExp('^'+schema.replaceAll("-","[a-z]").toLowerCase()+'$');
-  //
-  //  let matches = new Array();
-  //  wordArray.forEach(sample => {
-  //    if(regexedSchema.test(sample)){
-  //      matches.push(sample);
-  //    }
-  //  });
-  //  return matches;
-  //}
-  //
-  //randomItemInArray(array){
-  //  return array[Math.floor(Math.random()*array.length)];
-  //}
-  //
-  //randomInt(max){
-  //  return Math.floor(Math.random() * max);
-  //}
-  //
-  //randomIntMultiple(min, max, multiple){
-  //  return Math.round((Math.random()*(max-min)+min)/multiple)*multiple;
-  //}
 
+  // #1 select longest word
+  // 
+  // #2 select matching strings {save them for later}
+  // 
+  // #3 When matche are found move to next "challenge"
+  // 
+  // #4 If no matching string change candidate.
+  // 
+  // #5 if no more matching candidate brute reset
+
+  fill(data){
+  
+    const schem = [
+      [ "#", "?", "#", "?", "#", "?", "#", "?", "#", "?" ],
+      [ "?", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "#", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "?", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "#", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "?", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "#", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "?", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "#", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "?", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "#", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "?", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "#", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "?", "?", "?", "?", "?", "?", "?", "?", "?", "?" ],
+      [ "#", "?", "?", "?", "?", "?", "?", "?", "?", "?" ]
+    ];
+
+    console.log(schem.join('\n'));
+
+    schem.forEach( (col, i) => {
+      col.forEach( (line, j) => {
+
+        console.log(line+"["+i+";"+j+"]");
+
+        if(line === "#"){
+
+          //console.log(data);
+
+          //const index = this.randomInt(10).toString();
+          //let first = this.randomItemInArray(data[index]);
+
+          //let matches = this.wordFinding("-"+first.charAt(1)+"---", data[this.randomInt(10).toString()]);
+          //let seconde = matches[0];
+
+          //console.log("select word");
+          //
+          //this.createDefinition({
+          //  coordinate : [i,j],
+          //  definitions : [
+          //    {
+          //      label: "to add",
+          //      solution: first
+          //    },{
+          //      label: "to add",
+          //      solution: seconde
+          //    }
+          //  ]
+          //});
+
+        }
+
+      });
+    });
+  }
 }
