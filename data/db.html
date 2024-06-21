@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Crossword DataBase</title>
+</head>
+<body>
+  <script>
+    
+    window.addEventListener('load', function() {
+      init();
+    });
+
+    const init = async () => {
+
+      load('./500wordlist.json').then(data => {
+
+        data.sort(function(a, b) {
+          return a.length - b.length || // sort by length, if equal then
+          a.localeCompare(b);    // sort by dictionary order
+        });
+
+        let vocabulary = new Object();
+        data.forEach(word => {
+          if(vocabulary[word.length] == undefined) vocabulary[word.length] = new Array();
+          vocabulary[word.length].push(word.toLowerCase()); // TODO .normalize()
+        });
+
+        download(JSON.stringify(vocabulary), 'testdata.json', 'application/json');
+      });
+
+      async function load(url){
+        const options = {method: 'GET',cache: 'no-cache'}; //cache ?
+        let response = await fetch(new Request(url, options));
+        let data = await response.json();
+        return data;
+      }
+
+      function download(content, fileName, contentType) {
+        let a = document.createElement("a");
+        let file = new Blob([content], {type: contentType});
+        a.href = URL.createObjectURL(file);
+        a.download = fileName;
+        a.click();
+      }
+    }
+  </script>
+</body>
+</html>
